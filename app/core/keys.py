@@ -1,7 +1,7 @@
 from pathlib import Path
 
-PRIVATE_KEY_PATH = Path("app/keys/private.pem")
-PUBLIC_KEY_PATH = Path("app/keys/public.pem")
+PRIVATE_KEY_PATH = Path("app/keys/key1_private.pem")
+PUBLIC_KEY_PATH = Path("app/keys/key1_public.pem")
 
 with open(PRIVATE_KEY_PATH, "r") as f:
     PRIVATE_KEY = f.read()

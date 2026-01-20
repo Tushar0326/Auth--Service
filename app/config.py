@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     # Database
     database_url: str
 
+    # Telemetry
+    enable_telemetry: bool = False
+
     class Config:
         env_file = ".env"
 

@@ -3,29 +3,31 @@ from jose.utils import base64url_encode
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
-from app.core.keys import PUBLIC_KEY
+from app.core.key_store import KEYS
 
 router = APIRouter()
 
 
 @router.get("/.well-known/jwks.json")
 def jwks():
-    public_key = serialization.load_pem_public_key(
-        PUBLIC_KEY.encode(),
-        backend=default_backend()
-    )
+    jwk_keys = []
 
-    numbers = public_key.public_numbers()
+    for kid, keypair in KEYS.items():
+        public_key = serialization.load_pem_public_key(
+            keypair["public"].encode(),
+            backend=default_backend()
+        )
 
-    return {
-        "keys": [
-            {
-                "kty": "RSA",
-                "use": "sig",
-                "alg": "RS256",
-                "kid": "auth-key-1",
-                "n": base64url_encode(numbers.n.to_bytes(256, "big")).decode(),
-                "e": base64url_encode(numbers.e.to_bytes(3, "big")).decode(),
-            }
-        ]
-    }
+        numbers = public_key.public_numbers()
+
+        jwk_keys.append({
+            "kty": "RSA",
+            "use": "sig",
+            "alg": "RS256",
+            "kid": kid,
+            "n": base64url_encode(numbers.n.to_bytes(256, "big")).decode(),
+            "e": base64url_encode(numbers.e.to_bytes(3, "big")).decode(),
+        })
+
+    return {"keys": jwk_keys}
+

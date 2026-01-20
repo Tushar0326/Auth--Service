@@ -6,6 +6,8 @@ from app.api.v1.auth import router as auth_router
 from app.api.v1.oauth import router as oauth_router
 from app.api.oidc import router as oidc_router
 from app.api.jwks import router as jwks_router
+from app.core.telemetry import setup_telemetry
+
 
 
 app = FastAPI(
@@ -13,6 +15,13 @@ app = FastAPI(
     version="1.0.0",
     description="Authentication & Identity Provider"
 )
+
+@app.get("/")
+def root():
+    return {
+        "service": "OIDC Auth Service",
+        "status": "running"
+    }
 
 
 @app.get("/")
@@ -52,3 +61,6 @@ app.include_router(auth_router)
 app.include_router(oauth_router)
 app.include_router(oidc_router)
 app.include_router(jwks_router)
+
+
+setup_telemetry(app)

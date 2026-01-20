@@ -2,11 +2,13 @@ from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from jose.exceptions import JWTError
 
 from app.config import settings
 from app.db.deps import get_db
 from app.models.user import User
 from app.core.keys import PUBLIC_KEY
+from app.core.key_store import KEYS
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 
@@ -41,4 +43,16 @@ def get_current_user(
 
     return user
 
+def decode_token(token: str):
+    header = jwt.get_unverified_header(token)
+    kid = header.get("kid")
 
+    if kid not in KEYS:
+        raise JWTError("Unknown key")
+
+    return jwt.decode(
+        token,
+        KEYS[kid]["public"],
+        algorithms=["RS256"],
+        options={"verify_aud": False},
+    )
