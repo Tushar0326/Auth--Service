@@ -5,6 +5,7 @@ from app.db.base import Base
 from app.api.v1.auth import router as auth_router 
 from app.api.v1.oauth import router as oauth_router
 from app.api.oidc import router as oidc_router
+from app.api.jwks import router as jwks_router
 
 
 app = FastAPI(
@@ -50,3 +51,4 @@ Base.metadata.create_all(bind=engine)
 app.include_router(auth_router)
 app.include_router(oauth_router)
 app.include_router(oidc_router)
+app.include_router(jwks_router)
