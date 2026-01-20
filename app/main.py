@@ -3,6 +3,9 @@ from app.config import settings
 from app.db.session import engine
 from app.db.base import Base
 from app.api.v1.auth import router as auth_router 
+from app.api.v1.oauth import router as oauth_router
+from app.api.oidc import router as oidc_router
+
 
 app = FastAPI(
     title="OIDC Authentication Service",
@@ -45,3 +48,5 @@ app = FastAPI(title=settings.app_name)
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router)
+app.include_router(oauth_router)
+app.include_router(oidc_router)

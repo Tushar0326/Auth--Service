@@ -9,6 +9,9 @@ from app.core.security import hash_password
 from app.core.security import verify_password
 from app.core.jwt import create_access_token
 from app.core.auth import get_current_user
+from app.models.refresh_token import RefreshToken
+from app.core.refresh import generate_refresh_token, get_refresh_expiry
+from app.core.oidc import create_id_token
 
 
 router = APIRouter(prefix="/api/v1", tags=["Authentication"])
@@ -70,4 +73,40 @@ def read_current_user(current_user: User = Depends(get_current_user)):
     return {
         "id": current_user.id,
         "email": current_user.email
+    }
+
+from datetime import datetime
+from app.models.refresh_token import RefreshToken
+
+
+@router.post("/refresh")
+def refresh_access_token(
+    refresh_token: str,
+    db: Session = Depends(get_db),
+):
+    token = (
+        db.query(RefreshToken)
+        .filter(RefreshToken.token == refresh_token)
+        .first()
+    )
+
+    if not token or token.is_revoked:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid refresh token"
+        )
+
+    if token.expires_at < datetime.utcnow():
+        raise HTTPException(
+            status_code=401,
+            detail="Refresh token expired"
+        )
+
+    access_token = create_access_token(
+        data={"sub": token.user_id}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
     }
